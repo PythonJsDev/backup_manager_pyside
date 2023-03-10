@@ -1,11 +1,26 @@
+import sys
 from pathlib import Path
+
+from backup_manager_pyside.statics.styles.load_styles import load_styles
+
+from .views.main_window import MainWindow
+from PySide6 import QtWidgets
+
 from .models.directory_manager import DirectoryManager
 from .models.file_manager import FileManager
 
-from .controllers.directory_controller import DirectoryController
+# from .controllers.directory_controller import DirectoryController
 
 
 def main():
+    app = QtWidgets.QApplication(sys.argv)
+    load_styles(app)
+    w = MainWindow()
+    w.show()
+    app.exec()
+
+
+def main_draft():
     source = Path(r'D:\users\test backup manager')
     target = Path(r'D:\users\test backup manager - target')
     directory = DirectoryManager()
@@ -38,7 +53,7 @@ def main():
     print()
     print('files target', len(files_target))
     print()
-    files_to_copy, file_to_delete = file.diff_between_two_file_dicts(
+    files_to_copy, files_to_delete = file.diff_between_two_file_dicts(
         files_src, files_target
     )
     print('FILE To COPY or UPDATE')
@@ -47,11 +62,8 @@ def main():
     file.copy_or_update_files(
         files=files_to_copy, path_target=target, path_source=source
     )
-
-
-def mainb():
-    root = Path(r'D:\users\test backup manager')
-    DirectoryController().get_folders_tree_structure(root)
+    print('FILE To DELETE')
+    print(files_to_delete)
 
 
 if __name__ == "__main__":

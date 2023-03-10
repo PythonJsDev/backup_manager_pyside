@@ -53,9 +53,7 @@ def test_get_subdirectories_with_not_empty_folders(tmp_path):
     dir_c = root / 'dir_c'
     dir_c.mkdir()
     (dir_c / 'sub_dir_c').mkdir()
-    # assert (dir_a / 'hello.txt').read_text() == "hello"
-    # assert (root / 'python.py').read_text() == "hello python"
-    # assert (dir_c / 'sub_dir_c').is_dir()
+
     assert DirectoryManager().get_subdirectories(root) == [
         Path('dir_a'),
         Path('dir_b'),
@@ -98,7 +96,7 @@ def test_create_folders(tmp_path):
     assert folders.sort() == get_folders.sort()
 
 
-def test_create_folders_OSError(tmp_path, monkeypatch):
+def test_create_folders_OSError(monkeypatch):
     """Verifie que si, lors de la création d'un dossier, une execption OSError
     est le levée, celle-ci est gérée."""
     folders = ["dir_A"]

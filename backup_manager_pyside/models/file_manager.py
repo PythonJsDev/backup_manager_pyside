@@ -8,7 +8,7 @@ class FileManager:
     """gestion des fichiers"""
 
     def get_files_names_sizes(self, path: Path) -> dict[str:int]:
-        """Retourne un dictionnaire dont les clés sont les noms desfichiers
+        """Retourne un dictionnaire dont les clés sont les noms des fichiers
         et les valeurs sont les tailles du fichier.
         {file_name:file_size}"""
         return {

@@ -23,7 +23,8 @@ class DirectoryManager:
         dont les noms sont listés dans folders."""
         for folder in folders:
             try:
-                Path(path, folder).mkdir(exist_ok=True)
+                print('to_create', Path(path, folder))
+                # Path(path, folder).mkdir(exist_ok=True)
             except OSError as err:
                 Message().error_msg(f"Une erreur s'est produite !! : {err}")
 
@@ -34,8 +35,8 @@ class DirectoryManager:
         for folder in folders:
             try:
                 to_delete = Path(path, folder)
-                # print('to_delete', to_delete)
-                shutil.rmtree(to_delete)
+                print('to_delete', to_delete)
+                # shutil.rmtree(to_delete)
             except OSError as err:
                 Message().error_msg(f"Une erreur s'est produite !! : {err}")
 
@@ -53,16 +54,16 @@ class DirectoryManager:
         )
 
 
-if __name__ == "__main__":
-    test = DirectoryManager()
-    print(f"Chemin du dossier courant {test.get_current_directory_path()}")
-    print(f"dossier courant {test.get_current_directory_name()}")
-    folder = test.get_last_folder(
-        Path(r'D:\users\maury\DEV\cours_python\tests divers')
-    )
-    print(f"last folder : {folder}", type(folder))
-    folder_file = test.get_last_folder(
-        Path(r'D:\users\maury\DEV\cours_python\tests divers\settings.py')
-    )
-    print(f"last folder : {folder_file}")
-    print(test.get_subdirectories(Path(r'D:\users\test backup manager')))
+# if __name__ == "__main__":
+#     test = DirectoryManager()
+#     print(f"Chemin du dossier courant {test.get_current_directory_path()}")
+#     print(f"dossier courant {test.get_current_directory_name()}")
+#     folder = test.get_last_folder(
+#         Path(r'D:\users\maury\DEV\cours_python\tests divers')
+#     )
+#     print(f"last folder : {folder}", type(folder))
+#     folder_file = test.get_last_folder(
+#         Path(r'D:\users\maury\DEV\cours_python\tests divers\settings.py')
+#     )
+#     print(f"last folder : {folder_file}")
+#     print(test.get_subdirectories(Path(r'D:\users\test backup manager')))
