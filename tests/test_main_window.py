@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 from PySide6 import QtWidgets
 
-from backup_manager_pyside.views import utils
+from backup_manager_pyside.views import utils_views
 from backup_manager_pyside.views.main_window import MainWindow
 
 
@@ -70,7 +70,7 @@ def test_valid_dirs_path_same_folder_path(main_app):
         'src': Path(r"D\root_src\dirmame_a"),
         'target': Path(r"D\root_src\dirmame_a"),
     }
-    utils.valid_dirs_path(main_app, dirs_path)
+    utils_views.valid_dirs_path(main_app, dirs_path)
     assert not main_app.btn_valid.isEnabled()
 
 
@@ -81,7 +81,7 @@ def test_valid_dirs_path_different_folder_path(main_app):
         'src': Path(r"D\root_src\dirmame_a"),
         'target': Path(r"D\root_target\dirmame_a"),
     }
-    utils.valid_dirs_path(main_app, dirs_path)
+    utils_views.valid_dirs_path(main_app, dirs_path)
     assert main_app.btn_valid.isEnabled()
 
 
@@ -92,29 +92,29 @@ def test_valid_dirs_src_path_none(main_app):
         'src': None,
         'target': Path(r"D\root_target\dirmame_a"),
     }
-    utils.valid_dirs_path(main_app, dirs_path)
+    utils_views.valid_dirs_path(main_app, dirs_path)
     assert not main_app.btn_valid.isEnabled()
 
 
-def test_valid_dirs_target_parth_none(main_app):
+def test_valid_dirs_target_path_none(main_app):
     """Vérifie que si les dossiers cible est None alors le
     bouton 'Valider' est désactivé"""
     dirs_path = {
         'src': Path(r"D\root_src\dirmame_a"),
         'target': None,
     }
-    utils.valid_dirs_path(main_app, dirs_path)
+    utils_views.valid_dirs_path(main_app, dirs_path)
     assert not main_app.btn_valid.isEnabled()
 
 
-def test_valid_dirs_target_and_src_parth_none(main_app):
+def test_valid_dirs_target_and_src_path_none(main_app):
     """Vérifie que si les dossiers source et cible sont None alors le
     bouton 'Valider' est désactivé"""
     dirs_path = {
         'src': None,
         'target': None,
     }
-    utils.valid_dirs_path(main_app, dirs_path)
+    utils_views.valid_dirs_path(main_app, dirs_path)
     assert not main_app.btn_valid.isEnabled()
 
 
@@ -128,14 +128,14 @@ def test_get_dirname_src(main_app, monkeypatch):
         return None
 
     monkeypatch.setattr(
-        "backup_manager_pyside.views.utils.dialog_directories",
+        "backup_manager_pyside.views.utils_views.dialog_directories",
         mock_dialog_directories,
     )
     monkeypatch.setattr(
-        "backup_manager_pyside.views.utils.valid_dirs_path",
+        "backup_manager_pyside.views.utils_views.valid_dirs_path",
         mock_valid_dirs_path,
     )
-    utils.get_dirname(main_app, 'src')
+    utils_views.get_dirname(main_app, 'src')
     assert (
         main_app.te_dirs.toPlainText().replace('\n', '')
         == r'Dossier source:D:\root_path\src'
@@ -149,22 +149,20 @@ def test_get_dirname_src_and_target(main_app, monkeypatch):
     target_path = r"D:\root_path\target"
     mock_dialog_directories = mock.Mock()
     mock_dialog_directories.side_effect = [src_path, target_path]
-    # def mock_dialog_directories():
-    #     return src_path, target_path
-
+   
     def mock_valid_dirs_path(self, dirs_path):
         return None
 
     monkeypatch.setattr(
-        "backup_manager_pyside.views.utils.dialog_directories",
+        "backup_manager_pyside.views.utils_views.dialog_directories",
         mock_dialog_directories,
     )
     monkeypatch.setattr(
-        "backup_manager_pyside.views.utils.valid_dirs_path",
+        "backup_manager_pyside.views.utils_views.valid_dirs_path",
         mock_valid_dirs_path,
     )
-    utils.get_dirname(main_app, 'src')
-    utils.get_dirname(main_app, 'target')
+    utils_views.get_dirname(main_app, 'src')
+    utils_views.get_dirname(main_app, 'target')
     assert (
         main_app.te_dirs.toPlainText().replace('\n', '')
         == r"Dossier source:D:\root_path\srcDossier cible:D:\root_path\target"

@@ -5,14 +5,9 @@ from backup_manager_pyside.models.file_manager import FileManager
 
 
 def test_get_files_names_sizes(three_files_in_dir_root):
-    """Vérifie que get_files_names_sizes retourne un dictionnaire dont les
+    """Vérifie que 'get_files_names_sizes' retourne un dictionnaire dont les
     clés sont les noms des fichiers et les valeurs sont les tailles du fichier.
     {file_name:file_size}"""
-    # root = tmp_path / 'root'
-    # root.mkdir()
-    # (root / 'file_1.txt').write_text("hello")
-    # (root / 'file_2.py').write_text("hello python")
-    # (root / 'file_3.png').write_text("hello png")
     assert FileManager().get_files_names_sizes(three_files_in_dir_root) == {
         'file_1.txt': 5,
         'file_2.py': 12,
@@ -20,9 +15,19 @@ def test_get_files_names_sizes(three_files_in_dir_root):
     }
 
 
+def test_get_files_names_sizes_no_valid_path():
+    """Vérifie que 'get_files_names_sizes' retourne un dictionnaire dont les
+    clés sont les noms des fichiers et les valeurs sont les tailles du fichier.
+    {file_name:file_size}"""
+    assert str(FileManager().get_files_names_sizes(Path('no valid path'))) == (
+        "[WinError 3] Le chemin d’accès spécifié est introuvable:"
+        " 'no valid path'"
+    )
+
+
 def test_diff_between_two_file_dicts():
-    """Vérifie que diff_between_two_file_dicts retourne les dossiers de
-    list_1 manquants à list_2 et les dossiers de list_2 manquants à list_1"""
+    """Vérifie que 'diff_between_two_file_dicts' retourne les dossiers de
+    dict_1 manquants à dict_2 et les dossiers de dict_2 manquants à dict_1"""
     dict_1 = {'file_1.txt': 12, 'file_2.txt': 58, 'file_3.py': 25}
     dict_2 = {'file_1.txt': 12, 'file_2.txt': 78, 'file_4.png': 525}
 
@@ -37,8 +42,69 @@ def test_diff_between_two_file_dicts():
     assert sorted(missing_in_dict_1) == sorted(expected_missing_in_dict_1)
 
 
+def test_diff_between_two_file_dicts_dict_1_empty():
+    """Vérifie que 'diff_between_two_file_dicts' retourne aucun dossier de
+    dict_1 manquants à dict_2 et les dossiers de dict_2 sont tous manquants
+    à dict_1"""
+    dict_1 = {}
+    dict_2 = {'file_1.txt': 12, 'file_2.txt': 78, 'file_4.png': 525}
+
+    expected_missing_in_dict_2 = []
+    expected_missing_in_dict_1 = [
+        ('file_1.txt', 12),
+        ('file_2.txt', 78),
+        ('file_4.png', 525),
+    ]
+    (
+        missing_in_dict_2,
+        missing_in_dict_1,
+    ) = FileManager().diff_between_two_file_dicts(dict_1, dict_2)
+
+    assert sorted(missing_in_dict_2) == sorted(expected_missing_in_dict_2)
+    assert sorted(missing_in_dict_1) == sorted(expected_missing_in_dict_1)
+
+
+def test_diff_between_two_file_dicts_dict_2_empty():
+    """Vérifie que 'diff_between_two_file_dicts' retourne aucun dossier de
+    dict_2 manquants à dict_1 et les dossiers de dict_1 sont tous manquants
+    à dict_2"""
+    dict_1 = {'file_1.txt': 12, 'file_2.txt': 58, 'file_3.py': 25}
+    dict_2 = {}
+
+    expected_missing_in_dict_2 = [
+        ('file_1.txt', 12),
+        ('file_2.txt', 58),
+        ('file_3.py', 25),
+    ]
+    expected_missing_in_dict_1 = []
+    (
+        missing_in_dict_2,
+        missing_in_dict_1,
+    ) = FileManager().diff_between_two_file_dicts(dict_1, dict_2)
+
+    assert sorted(missing_in_dict_2) == sorted(expected_missing_in_dict_2)
+    assert sorted(missing_in_dict_1) == sorted(expected_missing_in_dict_1)
+
+
+def test_diff_between_two_file_dicts_dict_1_dict_2_empty():
+    """Vérifie que 'diff_between_two_file_dicts' retourne 2 listes vides
+    lorsque dict_1 et dict_2 sont vides"""
+    dict_1 = {}
+    dict_2 = {}
+
+    expected_missing_in_dict_2 = []
+    expected_missing_in_dict_1 = []
+    (
+        missing_in_dict_2,
+        missing_in_dict_1,
+    ) = FileManager().diff_between_two_file_dicts(dict_1, dict_2)
+
+    assert sorted(missing_in_dict_2) == sorted(expected_missing_in_dict_2)
+    assert sorted(missing_in_dict_1) == sorted(expected_missing_in_dict_1)
+
+
 def test_copy_or_update_files_call_shutil(monkeypatch):
-    """Verifie que la fonction shutil.copy2 soit appelé le bon nombre de fois
+    """Verifie que la fonction 'shutil.copy2' soit appelé le bon nombre de fois
     avec les bons arguments"""
     files_to_copy = [('file_1.txt', 12), ('file_2.png', 587)]
     path_target = Path(r'E:\target\target_dir')
@@ -67,7 +133,7 @@ def test_copy_or_update_files_call_shutil(monkeypatch):
 
 
 def test_copy_or_update_files_OSError(monkeypatch):
-    """Verifie que si shutil.copy2 lève une exception OSError,
+    """Verifie que si 'shutil.copy2' lève une exception OSError,
     celle-ci est gérée."""
     files_to_copy = [('file_1.txt', 12)]
     path_target = Path(r'E:\target\target_dir')
@@ -78,15 +144,15 @@ def test_copy_or_update_files_OSError(monkeypatch):
         "backup_manager_pyside.models.file_manager.shutil", mock_shutil
     )
     mock_shutil.copy2.side_effect = OSError('error message')
-    mock_error_msg = Mock()
-    monkeypatch.setattr(
-        "backup_manager_pyside.models.file_manager.Message.error_msg",
-        mock_error_msg,
-    )
-    error_msg = "Une erreur s'est produite !! : error message"
 
-    FileManager().copy_or_update_files(files_to_copy, path_target, path_source)
-    mock_error_msg.assert_called_once_with(error_msg)
+    assert (
+        str(
+            FileManager().copy_or_update_files(
+                files_to_copy, path_target, path_source
+            )
+        )
+        == "error message"
+    )
 
 
 def test_delete_files(three_files_in_dir_root):
@@ -110,12 +176,9 @@ def test_delete_files_OSError(three_files_in_dir_root, monkeypatch):
         mock_unlink,
     )
     mock_unlink.side_effect = OSError('error message')
-    mock_error_msg = Mock()
-    monkeypatch.setattr(
-        "backup_manager_pyside.models.file_manager.Message.error_msg",
-        mock_error_msg,
+    assert (
+        str(
+            FileManager().delete_files(files=files_to_delete, path_target=root)
+        )
+        == "error message"
     )
-    error_msg = "Une erreur s'est produite !! : error message"
-
-    FileManager().delete_files(files=files_to_delete, path_target=root)
-    mock_error_msg.assert_called_once_with(error_msg)

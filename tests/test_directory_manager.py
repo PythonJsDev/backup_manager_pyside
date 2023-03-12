@@ -32,7 +32,7 @@ def test_get_subdirectories_with_empty_folders(tmp_path):
     ]
 
 
-def test_get_subdirectories_with_not_empty_folders(tmp_path):
+def test_get_subdirectories_with_not_empty_folders(tree_structure_src):
     """Vérifie que get_subdirectories retourne la liste des sous-dossiers
     contenu dans le dossier root:
     root/dir_a/hello.txt
@@ -40,21 +40,7 @@ def test_get_subdirectories_with_not_empty_folders(tmp_path):
     root/pyton.py
     root/dir_c/sub_dir_c
     """
-    root = tmp_path / 'root'
-    root.mkdir()
-    dir_a = root / 'dir_a'
-    dir_a.mkdir()
-    (dir_a / 'hello.txt').write_text("hello")
-
-    (root / 'dir_b').mkdir()
-
-    (root / 'python.py').write_text("hello python")
-
-    dir_c = root / 'dir_c'
-    dir_c.mkdir()
-    (dir_c / 'sub_dir_c').mkdir()
-
-    assert DirectoryManager().get_subdirectories(root) == [
+    assert DirectoryManager().get_subdirectories(tree_structure_src) == [
         Path('dir_a'),
         Path('dir_b'),
         Path('dir_c'),
@@ -105,16 +91,12 @@ def test_create_folders_OSError(monkeypatch):
     monkeypatch.setattr(
         "backup_manager_pyside.models.directory_manager.Path.mkdir", mock_mkdir
     )
-    mock_mkdir.side_effect = OSError('error message')
-    mock_error_msg = Mock()
-    monkeypatch.setattr(
-        "backup_manager_pyside.models.directory_manager.Message.error_msg",
-        mock_error_msg,
-    )
-    error_msg = "Une erreur s'est produite !! : error message"
+    mock_mkdir.side_effect = OSError("error message")
 
-    DirectoryManager().create_folders(path_target, folders)
-    mock_error_msg.assert_called_once_with(error_msg)
+    assert (
+        str(DirectoryManager().create_folders(path_target, folders))
+        == "error message"
+    )
 
 
 def test_delete_folders_call_shutil(monkeypatch):
@@ -152,12 +134,8 @@ def test_delete_folders_OSError(monkeypatch):
         "backup_manager_pyside.models.directory_manager.shutil", mock_shutil
     )
     mock_shutil.rmtree.side_effect = OSError('error message')
-    mock_error_msg = Mock()
-    monkeypatch.setattr(
-        "backup_manager_pyside.models.directory_manager.Message.error_msg",
-        mock_error_msg,
-    )
-    error_msg = "Une erreur s'est produite !! : error message"
 
-    DirectoryManager().delete_folders(path_target, folders_tree)
-    mock_error_msg.assert_called_once_with(error_msg)
+    assert (
+        str(DirectoryManager().delete_folders(path_target, folders_tree))
+        == "error message"
+    )

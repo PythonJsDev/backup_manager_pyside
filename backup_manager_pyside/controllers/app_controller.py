@@ -2,77 +2,141 @@ from pathlib import Path
 
 from ..models.directory_manager import DirectoryManager
 from ..models.file_manager import FileManager
-from ..views.info_dialog import InfoDialog
+from ..views.utils_views import info_msg
+from .utils_controller import (
+    display_message_if_error,
+    display_info_if_empty,
+    to_cancel,
+    cancel_controller,
+    display_list_dirs_to_create,
+    display_list_dirs_to_delete,
+    display_list_files_to_create,
+    display_list_files_to_delete,
+)
 
 
 class AppController:
-    # def __init__(self) -> None:
-    #     self.missing_folders = []
-    #     self.excess_folders = []
+    def __init__(self) -> None:
+        self.directory = DirectoryManager()
+        self.file = FileManager()
+        self.app_canceled = False
+        self.missing_folders: list[Path] = []
+        self.excess_folders: list[Path] = []
+        self.missing_files: list[tuple[str, int]] = []
+        self.excess_files: list[tuple[str, int]] = []
 
-    def app_controller(self, dirs_path):
-        self.directory_controller(dirs_path)
-        self.file_controller()
+    def app_controller(self, dirs_path: dict[str, str], main_window):
+        self.main_window = main_window
+        self.get_difference_between_dirs_src_and_target(dirs_path)
+        self.update_directories_controller()
+        self.update_files_controller()
 
-    def directory_controller(self, dirs_path):
-        self.source = Path(dirs_path.get('src'))
-        self.target = Path(dirs_path.get('target'))
-        directory = DirectoryManager()
-
-        self.sub_folders_src = directory.get_subdirectories(self.source)
-        print('SOURCE', len(self.sub_folders_src))
-        for f in self.sub_folders_src:
-            print(f)
-        sub_folders_target = directory.get_subdirectories(self.target)
-        print()
-        print('TARGET', len(sub_folders_target))
-        for f in sub_folders_target:
-            print(f)
-        # print(sub_folders_src, sub_folders_target)
-        (
-            self.missing_folders,
-            self.excess_folders,
-        ) = directory.diff_between_two_folder_lists(
-            self.sub_folders_src, sub_folders_target
-        )
-        print()
-        print('MISSING')
-        print(self.missing_folders)
-        print()
-        print('EXCESS')
-        print(self.excess_folders)
-        message = (
-            'Les dossiers suivants vont être créés sur la cible'
-            f' dans le dossier: \n{self.target}:'
-        )
-        dlg = InfoDialog(
-            'Mise à jour des dossiers', message, self.missing_folders
-        )
-        if dlg.exec():
-            print('------ Success ! -----------')
-            directory.create_folders(self.target, self.missing_folders)
+    def get_difference_between_dirs_src_and_target(
+        self, dirs_path: dict[str, str]
+    ):
+        """Détermine les dossiers manquants et les dossiers en exces sur
+        la cible"""
+        self.src = Path(dirs_path.get('src', ''))
+        self.target = Path(dirs_path.get('target', ''))
+        self.sub_folders_src = self.directory.get_subdirectories(self.src)
+        if not self.sub_folders_src:
+            display_info_if_empty(self.src, self.main_window)
         else:
-            print('------ Cancel ! ------------')
+            self.sub_folders_target = self.directory.get_subdirectories(
+                self.target
+            )
+            (
+                self.missing_folders,
+                self.excess_folders,
+            ) = self.directory.diff_between_two_folder_lists(
+                self.sub_folders_src, self.sub_folders_target
+            )
 
-        message = (
-            'Les dossiers suivants vont être supprimés sur la cible'
-            f' dans le dossier: \n{self.target}:'
-        )
-        dlg = InfoDialog(
-            'Mise à jour des dossiers', message, self.excess_folders
-        )
-        if dlg.exec():
-            print('------ Success ! -----------')
-            directory.delete_folders(self.target, self.excess_folders)
-        else:
-            print('------ Cancel ! ------------')
+    def update_directories_controller(self):
+        """Controle de la création des dossiers manquants et de la suppression
+        des dossiers en exces sur la cible"""
+        if self.missing_folders:
+            if display_list_dirs_to_create(self):
+                created_dir = self.directory.create_folders(
+                    self.target, sorted(self.missing_folders)
+                )
+                display_message_if_error(created_dir, self.main_window)
+            else:
+                to_cancel(self, self.main_window)
 
-    def file_controller(self):
-        print('----------- file controller ------------------')
-        # print('missing', self.missing_folders)
-        file = FileManager()
-        for folder in self.sub_folders_src:
-            print(self.source/folder)
-            src_files = file.get_files_names_sizes(self.source/folder)
-            print('*', src_files)
-            
+        if not self.app_canceled and self.excess_folders:
+            if display_list_dirs_to_delete(self):
+                deleted_dir = self.directory.delete_folders(
+                    self.target, sorted(self.excess_folders, reverse=True)
+                )
+                display_message_if_error(deleted_dir, self.main_window)
+            else:
+                to_cancel(self, self.main_window)
+
+    def update_files_controller(self):
+        if not self.app_canceled:
+            self.sub_folders_src.insert(0, Path(''))
+
+            for folder in self.sub_folders_src:
+                if not self.get_difference_between_files_src_and_target(
+                    folder
+                ):
+                    continue
+                print('***************')
+                print('missing_files', self.missing_files)
+                print('excess_files', self.excess_files)
+                if self.missing_files:
+                    if display_list_files_to_create(self, folder):
+                        created_file = self.file.copy_or_update_files(
+                            sorted(self.missing_files),
+                            self.target / folder,
+                            self.src / folder,
+                        )
+                        display_message_if_error(
+                            created_file, self.main_window
+                        )
+                    else:
+                        to_cancel(self, self.main_window)
+                        break
+
+                if self.excess_files:
+                    if display_list_files_to_delete(self, folder):
+                        deleted_file = self.file.delete_files(
+                            sorted(self.excess_files), self.target / folder
+                        )
+                        display_message_if_error(
+                            deleted_file, self.main_window
+                        )
+                    else:
+                        to_cancel(self, self.main_window)
+                        break
+
+            if not self.app_canceled:
+                info_msg(
+                    self.main_window,
+                    "C'est fait !",
+                    "La mise à jour est terminée",
+                )
+                cancel_controller(self, self.main_window)
+
+    def get_difference_between_files_src_and_target(
+        self, folder: Path
+    ) -> bool:
+        self.missing_files = []
+        self.excess_files = []
+        src_files = self.file.get_files_names_sizes(self.src / folder)
+
+        if display_message_if_error(src_files, self.main_window):
+            return False
+        target_files = self.file.get_files_names_sizes(self.target / folder)
+        if display_message_if_error(target_files, self.main_window):
+            return False
+        if not isinstance(src_files, OSError) and not isinstance(
+            target_files, OSError
+        ):
+            (
+                self.missing_files,
+                self.excess_files,
+            ) = self.file.diff_between_two_file_dicts(src_files, target_files)
+
+        return True

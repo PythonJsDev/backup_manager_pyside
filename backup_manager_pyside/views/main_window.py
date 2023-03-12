@@ -1,11 +1,11 @@
 from PySide6 import QtCore, QtWidgets
 
 from backup_manager_pyside.controllers.app_controller import AppController
-
+from .utils_views import cancel
 from .constants import BTN_HEIGHT, BTN_WIDTH, MAIN_WIN_HEIGHT, MAIN_WIN_WIDTH
 
 # from PySide6.QtGui import Qt
-from .utils import separator_hline, get_dirname
+from .utils_views import separator_hline, get_dirname
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -61,11 +61,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_valid.setEnabled(False)
         self.btn_valid.setFixedSize(BTN_WIDTH, BTN_HEIGHT)
         self.btn_valid.clicked.connect(
-            lambda: AppController().app_controller(self.dirs_path)
+            lambda: AppController().app_controller(self.dirs_path, self)
         )
         self.btn_cancel = QtWidgets.QPushButton("Annuler")
         self.btn_cancel.setFixedSize(BTN_WIDTH, BTN_HEIGHT)
-        self.btn_cancel.clicked.connect(self.cancel)
+        self.btn_cancel.clicked.connect(lambda: cancel(self))
 
     def add_widgets_to_QGridLayout(self):
         self.main_layout.addWidget(self.lbl_title, 0, 0, 1, 4)
@@ -97,8 +97,4 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             event.ignore()
 
-    def cancel(self):
-        self.te_dirs.clear()
-        self.btn_valid.setEnabled(False)
-        self.btn_target.setEnabled(False)
-        self.dirs_path = {}
+    

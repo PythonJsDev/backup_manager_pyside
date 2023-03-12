@@ -1,23 +1,26 @@
 import shutil
 from pathlib import Path
 
-from ..views.message import Message
-
 
 class FileManager:
     """gestion des fichiers"""
 
-    def get_files_names_sizes(self, path: Path) -> dict[str:int]:
+    def get_files_names_sizes(self, path: Path) -> dict[str, int] | OSError:
         """Retourne un dictionnaire dont les clés sont les noms des fichiers
         et les valeurs sont les tailles du fichier.
         {file_name:file_size}"""
-        return {
-            f.name: f.stat().st_size for f in path.iterdir() if f.is_file()
-        }
+        try:
+            return {
+                f.name: f.stat().st_size for f in path.iterdir() if f.is_file()
+            }
+        except OSError as err:
+            return err
 
     def diff_between_two_file_dicts(
-        self, dict_1: dict[str:int], dict_2: dict[str:int]
-    ) -> list[tuple[str, int]]:
+        self,
+        dict_1: dict[str, int],
+        dict_2: dict[str, int],
+    ) -> tuple[list[tuple[str, int]], list[tuple[str, int]]]:
         """Retourne la liste des noms de tuple (nom de fichiers,
         taille du fichier) présents dans 'dict_1' mais pas dans 'dict_2'
         et inversement.
@@ -31,17 +34,18 @@ class FileManager:
         self,
         files: list[tuple[str, int]],
         path_target: Path,
-        path_source: Path,
+        path_src: Path,
     ):
         """Copie sur la cible, dans le dossier pointé par 'path_target', les
         fichiers présents dans la liste 'files'"""
         for file in files:
             try:
-                source = path_source / file[0]
+                src = path_src / file[0]
                 target = path_target / file[0]
-                shutil.copy2(source, target)
+                # print('file_to_copy', src, target)
+                shutil.copy2(src, target)
             except OSError as err:
-                Message().error_msg(f"Une erreur s'est produite !! : {err}")
+                return err
 
     def delete_files(
         self,
@@ -53,6 +57,7 @@ class FileManager:
         for file in files:
             try:
                 file_to_delete = Path(path_target / file[0])
+                # print('file_to_delete', file_to_delete)
                 file_to_delete.unlink()
             except OSError as err:
-                Message().error_msg(f"Une erreur s'est produite !! : {err}")
+                return err
