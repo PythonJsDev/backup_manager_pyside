@@ -42,7 +42,6 @@ class FileManager:
             try:
                 src = path_src / file[0]
                 target = path_target / file[0]
-                # print('file_to_copy', src, target)
                 shutil.copy2(src, target)
             except OSError as err:
                 return err
@@ -57,7 +56,6 @@ class FileManager:
         for file in files:
             try:
                 file_to_delete = Path(path_target / file[0])
-                # print('file_to_delete', file_to_delete)
                 file_to_delete.unlink()
             except OSError as err:
                 return err

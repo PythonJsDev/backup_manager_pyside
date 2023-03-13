@@ -4,7 +4,6 @@ from backup_manager_pyside.controllers.app_controller import AppController
 from .utils_views import cancel
 from .constants import BTN_HEIGHT, BTN_WIDTH, MAIN_WIN_HEIGHT, MAIN_WIN_WIDTH
 
-# from PySide6.QtGui import Qt
 from .utils_views import separator_hline, get_dirname
 
 
@@ -13,7 +12,6 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         self.dirs_path = {}
         self.setWindowTitle("Backup Manager")
-        # self.resize(self.width(), self.minimumSizeHint().height())
         self.resize(MAIN_WIN_WIDTH, MAIN_WIN_HEIGHT)
         self.setup_ui()
         widget = QtWidgets.QWidget()
@@ -24,9 +22,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_layout()
         self.create_widgets()
         self.add_widgets_to_QGridLayout()
-        # self.validator_inputs()
-
-    # self.add_widgets_to_layouts()
 
     def create_layout(self):
         self.main_layout = QtWidgets.QGridLayout()
@@ -96,5 +91,3 @@ class MainWindow(QtWidgets.QMainWindow):
             event.accept()
         else:
             event.ignore()
-
-    

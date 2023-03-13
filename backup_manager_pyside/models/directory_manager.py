@@ -21,7 +21,6 @@ class DirectoryManager:
         dont les noms sont listés dans folders."""
         for folder in folders:
             try:
-                # print('to_create', Path(path, folder))
                 Path(path, folder).mkdir(exist_ok=True)
             except OSError as err:
                 return err
@@ -33,7 +32,6 @@ class DirectoryManager:
         for folder in folders:
             try:
                 to_delete = Path(path, folder)
-                # print('to_delete', to_delete)
                 shutil.rmtree(to_delete)
             except OSError as err:
                 return err

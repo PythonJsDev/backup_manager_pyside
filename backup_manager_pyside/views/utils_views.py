@@ -67,7 +67,7 @@ def error_msg(self, message: str):
         self,
         'Erreur critique !',
         message,
-        buttons=QtWidgets.QMessageBox.Ignore
+        buttons=QtWidgets.QMessageBox.Ignore,
     )
 
 

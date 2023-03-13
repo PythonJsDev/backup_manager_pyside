@@ -6,14 +6,15 @@ from ..views.utils_views import info_msg
 def display_message_if_error(obj, main_window) -> bool:
     """Affiche dans une message box une erreur de type OSError"""
     if isinstance(obj, OSError):
-        utils_views.error_msg(main_window, str(obj))
+        utils_views.error_msg(
+            main_window, f"{obj.strerror}:\n'{obj.filename}'")
         return True
     return False
 
 
 def display_info_if_empty(path, main_window):
     """Affiche en message box si le dossier pointé par path est vide"""
-    utils_views.warning(main_window, f"Le dossier '{str(path)}' est vide")
+    utils_views.warning_msg(main_window, f"Le dossier '{str(path)}' est vide")
 
 
 def ask_to_confirm(title, message, data_list, parent):

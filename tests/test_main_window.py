@@ -149,7 +149,7 @@ def test_get_dirname_src_and_target(main_app, monkeypatch):
     target_path = r"D:\root_path\target"
     mock_dialog_directories = mock.Mock()
     mock_dialog_directories.side_effect = [src_path, target_path]
-   
+
     def mock_valid_dirs_path(self, dirs_path):
         return None
 

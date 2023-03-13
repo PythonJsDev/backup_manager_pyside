@@ -82,9 +82,6 @@ class AppController:
                     folder
                 ):
                     continue
-                print('***************')
-                print('missing_files', self.missing_files)
-                print('excess_files', self.excess_files)
                 if self.missing_files:
                     if display_list_files_to_create(self, folder):
                         created_file = self.file.copy_or_update_files(
