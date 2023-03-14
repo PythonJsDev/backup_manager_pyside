@@ -74,6 +74,8 @@ class AppController:
                 to_cancel(self, self.main_window)
 
     def update_files_controller(self):
+        """Controle de la création des fichiers manquants et de la suppression
+        des fichiers en exces sur la cible"""
         if not self.app_canceled:
             self.sub_folders_src.insert(0, Path(''))
 
@@ -82,6 +84,18 @@ class AppController:
                     folder
                 ):
                     continue
+
+                if self.excess_files:
+                    if display_list_files_to_delete(self, folder):
+                        deleted_file = self.file.delete_files(
+                            sorted(self.excess_files), self.target / folder
+                        )
+                        display_message_if_error(
+                            deleted_file, self.main_window
+                        )
+                    else:
+                        to_cancel(self, self.main_window)
+                        break
                 if self.missing_files:
                     if display_list_files_to_create(self, folder):
                         created_file = self.file.copy_or_update_files(
@@ -91,18 +105,6 @@ class AppController:
                         )
                         display_message_if_error(
                             created_file, self.main_window
-                        )
-                    else:
-                        to_cancel(self, self.main_window)
-                        break
-
-                if self.excess_files:
-                    if display_list_files_to_delete(self, folder):
-                        deleted_file = self.file.delete_files(
-                            sorted(self.excess_files), self.target / folder
-                        )
-                        display_message_if_error(
-                            deleted_file, self.main_window
                         )
                     else:
                         to_cancel(self, self.main_window)

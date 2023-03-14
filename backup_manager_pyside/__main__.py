@@ -4,7 +4,7 @@ from PySide6 import QtWidgets
 
 from backup_manager_pyside.statics.styles.load_styles import load_styles
 
-from .views.main_window import MainWindow
+from backup_manager_pyside.views.main_window import MainWindow
 
 
 def main():
