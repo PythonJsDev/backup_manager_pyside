@@ -14,7 +14,10 @@ class DirectoryManager:
     def get_subdirectories(self, path: Path) -> list[Path]:
         """Retourne la liste des chemins de tous les
         sous-dossiers pointé par path."""
-        return [x.relative_to(path) for x in path.rglob("*") if x.is_dir()]
+        try:
+            return [x.relative_to(path) for x in path.rglob("*") if x.is_dir()]
+        except OSError as err:
+            return err
 
     def create_folders(self, path: Path, folders: list[str]):
         """Création des dossiers à l'emplacement précisé par le path et

@@ -30,7 +30,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # labels
         self.lbl_title = QtWidgets.QLabel("Backup Manager")
         self.lbl_title.setAlignment(QtCore.Qt.AlignCenter)
-        # self.lbl_title.setFixedSize(self.lbl_title.sizeHint())
         self.lbl_title.setFixedHeight(40)
 
         self.hline_top = separator_hline(self, name='hline_top', thick=3)

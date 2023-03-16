@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from .constants_controller import FOLDERS_TO_IGNORE
 from ..models.directory_manager import DirectoryManager
 from ..models.file_manager import FileManager
 from ..views.utils_views import info_msg
@@ -12,6 +12,8 @@ from .utils_controller import (
     display_list_dirs_to_delete,
     display_list_files_to_create,
     display_list_files_to_delete,
+    filtering_list_items,
+    valid_target_path,
 )
 
 
@@ -28,8 +30,8 @@ class AppController:
     def app_controller(self, dirs_path: dict[str, str], main_window):
         self.main_window = main_window
         self.get_difference_between_dirs_src_and_target(dirs_path)
-        self.update_directories_controller()
-        self.update_files_controller()
+        # self.update_directories_controller()
+        # self.update_files_controller()
 
     def get_difference_between_dirs_src_and_target(
         self, dirs_path: dict[str, str]
@@ -38,19 +40,28 @@ class AppController:
         la cible"""
         self.src = Path(dirs_path.get('src', ''))
         self.target = Path(dirs_path.get('target', ''))
-        self.sub_folders_src = self.directory.get_subdirectories(self.src)
-        if not self.sub_folders_src:
-            display_info_if_empty(self.src, self.main_window)
-        else:
-            self.sub_folders_target = self.directory.get_subdirectories(
-                self.target
-            )
-            (
-                self.missing_folders,
-                self.excess_folders,
-            ) = self.directory.diff_between_two_folder_lists(
-                self.sub_folders_src, self.sub_folders_target
-            )
+        if valid_target_path(self, self.main_window):
+            self.sub_folders_src = self.directory.get_subdirectories(self.src)
+            display_message_if_error(self.sub_folders_src, self.main_window)
+            if not self.sub_folders_src:
+                display_info_if_empty(self.src, self.main_window)
+            else:
+                self.sub_folders_target = self.directory.get_subdirectories(
+                    self.target
+                )
+                display_message_if_error(
+                    self.sub_folders_target, self.main_window
+                )
+                (
+                    self.missing_folders,
+                    self.excess_folders,
+                ) = self.directory.diff_between_two_folder_lists(
+                    self.sub_folders_src, self.sub_folders_target
+                )
+                self.missing_folders = filtering_list_items(
+                    self.missing_folders, FOLDERS_TO_IGNORE
+                )
+                self.update_directories_controller()
 
     def update_directories_controller(self):
         """Controle de la création des dossiers manquants et de la suppression
