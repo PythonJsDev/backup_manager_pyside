@@ -2,8 +2,6 @@ from pathlib import Path
 
 from PySide6 import QtWidgets
 
-# from ..controllers import utils_controller
-
 
 def separator_hline(self, name: str = 'Hline', thick: int = 1):
     """Création d'une ligne horizontale d'épaisseur 'thick'"""
@@ -25,7 +23,6 @@ def get_dirname(self, cat: str):
             self.btn_target.setEnabled(True)
             msg = f"Dossier source:\n{self.dirs_path.get('src')}\n"
         else:
-            # self.btn_src.setEnabled(False)
             self.dirs_path['target'] = Path(directory)
             msg = (
                 f"Dossier source:\n{self.dirs_path.get('src')}\n"
@@ -66,36 +63,6 @@ def valid_dirs_path(self, dirs_path: dict[str, Path]):
                 ),
             )
             self.btn_valid.setEnabled(False)
-        # elif src_path.name != target_path.name:
-        #     warning_msg(
-        #         self,
-        #         ("Les dossiers 'source' et 'cible' doivent avoir le même nom"),
-        #     )
-        #     print('-------val dir', target_path)
-        #     already_exist = utils_controller.existing_folder(
-        #         target_path, src_path
-        #     )
-        #     if not already_exist:
-        #         if authorize_an_action(
-        #             self,
-        #             'Action',
-        #             f"Voulez-vous créer le dossier '{src_path.name}'",
-        #         ):
-        #             path = target_path / Path(src_path.name)
-        #             print(path)
-        #         else:
-        #             info_msg(
-        #                 self,
-        #                 "Dossier invalide",
-        #                 "Veuillez modifier le dossier cible",
-        #             )
-        #     else:
-        #         info_msg(
-        #             self,
-        #             "Dossier existant",
-        #             f"{already_exist}\nVeuillez modifier le dossier cible",
-        #         )
-        #     self.btn_valid.setEnabled(False)
         else:
             self.btn_valid.setEnabled(True)
 
@@ -115,16 +82,8 @@ def error_msg(self, message: str):
         self,
         'Erreur critique !',
         message,
-        buttons=QtWidgets.QMessageBox.Ignore,
+        buttons=QtWidgets.QMessageBox.Ok,
     )
-
-
-def cancel(self):
-    """Remise à zéro du l'interface utilisateur"""
-    self.te_dirs.clear()
-    self.btn_valid.setEnabled(False)
-    self.btn_target.setEnabled(False)
-    self.dirs_path = {}
 
 
 def info_msg(self, title: str, message: str):
@@ -142,10 +101,43 @@ def authorize_an_action(self, title: str, message: str):
         self,
         title,
         message,
-        # buttons=QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
     )
     if button == QtWidgets.QMessageBox.Yes:
         return True
     if button == QtWidgets.QMessageBox.No:
         return False
     return False
+
+
+def cancel(self):
+    """Remise à zéro du l'interface utilisateur"""
+    self.te_dirs.clear()
+    self.btn_valid.setEnabled(False)
+    self.btn_target.setEnabled(False)
+    self.dirs_path = {}
+
+
+class ItemDialog(QtWidgets.QDialog):
+    def __init__(self, title, message, items, parent=None):
+        super().__init__(parent=parent)
+
+        self.setWindowTitle(title)
+        self.te_txt = QtWidgets.QTextEdit()
+        self.te_txt.setReadOnly(True)
+        items_str = [str(i) for i in items]
+        self.te_txt.setText('\n'.join(items_str))
+        buttons = (
+            QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
+        )
+
+        self.buttonBox = QtWidgets.QDialogButtonBox(buttons)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        self.layout = QtWidgets.QVBoxLayout()
+        self.msg = QtWidgets.QLabel(message)
+
+        self.layout.addWidget(self.msg)
+        self.layout.addWidget(self.te_txt)
+        self.layout.addWidget(self.buttonBox)
+        self.setLayout(self.layout)

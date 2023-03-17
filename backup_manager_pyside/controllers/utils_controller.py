@@ -2,10 +2,6 @@ from pathlib import Path
 
 from ..models import directory_manager
 from ..views import utils_views
-from ..views.info_dialog import InfoDialog
-
-# from ..views.utils_views import warning_msg, info_msg
-# from ..views.utils_views import info_msg
 
 
 def display_message_if_error(obj, main_window) -> bool:
@@ -26,7 +22,7 @@ def display_info_if_empty(path, main_window):
 def ask_to_confirm(title, message, data_list, parent):
     """Affiche une fenêtre modale pour afficher une liste de dossier
     ou de fichiers et demande la confirmation à l'action proposée"""
-    dlg = InfoDialog(title, message, data_list, parent)
+    dlg = utils_views.ItemDialog(title, message, data_list, parent)
     if dlg.exec():
         return True
     return False
@@ -204,7 +200,7 @@ def valid_target_path(self, main_window):
 def existing_folder(
     target_path: Path, src_path: Path, main_window
 ) -> str | OSError | bool:
-    """vérifie si le dossier passé dans target-path existe"""
+    """vérifie si le dossier passé dans target_path existe"""
     sub_folders_target = (
         directory_manager.DirectoryManager().get_subdirectories(target_path)
     )

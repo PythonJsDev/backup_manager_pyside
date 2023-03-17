@@ -30,8 +30,6 @@ class AppController:
     def app_controller(self, dirs_path: dict[str, str], main_window):
         self.main_window = main_window
         self.get_difference_between_dirs_src_and_target(dirs_path)
-        # self.update_directories_controller()
-        # self.update_files_controller()
 
     def get_difference_between_dirs_src_and_target(
         self, dirs_path: dict[str, str]
@@ -83,11 +81,15 @@ class AppController:
                 display_message_if_error(deleted_dir, self.main_window)
             else:
                 to_cancel(self, self.main_window)
+        self.update_files_controller()
 
     def update_files_controller(self):
         """Controle de la création des fichiers manquants et de la suppression
         des fichiers en exces sur la cible"""
         if not self.app_canceled:
+            self.sub_folders_src = filtering_list_items(
+                self.sub_folders_src, FOLDERS_TO_IGNORE
+            )
             self.sub_folders_src.insert(0, Path(''))
 
             for folder in self.sub_folders_src:
